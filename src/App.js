@@ -6,13 +6,128 @@ export default class cpqdemo extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      featureOne: {name:'',value: 0},
-      featureTwo: {name:'',value: 0},
-      featureThree: {name:'',value: 0}
+      totalFeatures:3,
+      selectedFeatures:[
+        {
+          name:'',value: 0
+        },
+        {
+          name:'',value: 0
+        },
+        {
+          name:'',value: 0
+        }
+      ],
+      features:[
+        [
+          {name:'AA',value: 10, always:true,rules:[]},
+          {name:'AB',value: 12, always:true,rules:[]},
+          {name:'AC',value: 14, always:true,rules:[]},
+          {name:'AD',value: 16, always:true,rules:[]},
+          {name:'AE',value: 18, always:true,rules:[]},
+        ],
+        [
+          {name:'BA',value: 10, always:true,rules:[{names:['AA']}]},
+          {name:'BB',value: 12, always:true,rules:[]},
+          {name:'BC',value: 14, always:true,rules:[]},
+          {name:'BD',value: 16, always:true,rules:[]},
+          {name:'BE',value: 18, always:true,rules:[]},
+        ],
+        [
+          {name:'CA',value: 10, always:true,rules:[{names:['AA','BB']},{names:['BC']}]},
+          {name:'CB',value: 12, always:true,rules:[{names:['AA']},{names:['BB']}]},
+          {name:'CC',value: 14, always:true,rules:[]},
+          {name:'CD',value: 16, always:true,rules:[]},
+          {name:'CE',value: 18, always:true,rules:[]},
+        ]
+      ]
     };
   }
+  makeFeature(index,options){
+    var optionsList = [];
+    for (var i = 0; i < options.length; i++) {
+      optionsList[i] = this.makeFeatureOption(options[i].name,options[i].value,options[i].always,options[i].rules,index)
+    }
+    return(
+      <Card>
+        <Card.Header>
+          <Accordion.Toggle as={Button} variant="link" eventKey={index+1}>
+            Feature {index+1}: {this.state.selectedFeatures[index].name}
+          </Accordion.Toggle>
+        </Card.Header>
+        <Accordion.Collapse eventKey={index+1}>
+          <Card.Body>
+            <ListGroup>
+              {optionsList}
+            </ListGroup>
+          </Card.Body>
+        </Accordion.Collapse>
+      </Card>
+    );
+  }
+  makeFeatureOption(name,value,always,rules,index){
+    var disabled = false;
+    for(var i = 0; i < rules.length; i++){
+      disabled = true;
+      for(var x = 0; x < rules[i].names.length; x++){
+        var contains = false;
+        for(var y = 0; y<this.state.totalFeatures; y++){
+          if(this.state.selectedFeatures[y].name === rules[i].names[x]){
+            contains = true;
+          }
+        }
+        if(!contains){
+          disabled = false;
+        }
+      }
+      if(disabled === true){
+        break;
+      }
+    }
+    if(always !== true){
+      if(disabled === false){
+        disabled = true;
+      }else{
+        disabled = false;
+      }
+    }
+    if(disabled){
+      return(
+        <ListGroup.Item 
+          action
+          disabled
+          style={{color:"red"}}
+          onClick={()=>{
+            let new_state = Object.assign({}, this.state.selectedFeatures); 
+            new_state[index] = {name:name,value:value};
+            this.setState({selectedFeatures: new_state});
+          }}
+        >{name}</ListGroup.Item>
+      );
+    }else{
+      return(
+        <ListGroup.Item 
+          action
+          onClick={()=>{
+            let new_state = Object.assign({}, this.state.selectedFeatures); 
+            new_state[index] = {name:name,value:value};
+            this.setState({selectedFeatures: new_state});
+          }}
+        >{name}</ListGroup.Item>
+      );
+    }
 
+  }
+  calculateTotal(){
+    return this.state.selectedFeatures[0].value +this.state.selectedFeatures[1].value +this.state.selectedFeatures[2].value;
+  }
   render () {
+
+    var allFeatures = [];
+    for(var i = 0;i<this.state.features.length;i++){
+      allFeatures[i] = this.makeFeature(i,this.state.features[i]);
+    }
+
     return (
       <div className='App-container'>
         <header className='App-header'>
@@ -20,99 +135,10 @@ export default class cpqdemo extends Component {
         </header>
         <div className='feature-container'>
           <Accordion>
+            {allFeatures}
             <Card>
               <Card.Header>
-                <Accordion.Toggle as={Button} variant="link" eventKey="0">
-                  Feature One: {this.state.featureOne.name}
-                </Accordion.Toggle>
-              </Card.Header>
-              <Accordion.Collapse eventKey="0">
-                <Card.Body>
-                  <ListGroup>
-                    <ListGroup.Item action onClick={()=>{
-                      this.setState({featureOne:{name:'AA',value: 10}});   
-                    }}>AA</ListGroup.Item>
-                    <ListGroup.Item action onClick={()=>{
-                      this.setState({featureOne:{name:'AB',value: 12}});   
-                    }}>AB</ListGroup.Item>
-                    <ListGroup.Item action onClick={()=>{
-                      this.setState({featureOne:{name:'AC',value: 14}});   
-                    }}>AC</ListGroup.Item>
-                    <ListGroup.Item action onClick={()=>{
-                      this.setState({featureOne:{name:'AD',value: 16}});   
-                    }}>AD</ListGroup.Item>
-                    <ListGroup.Item action onClick={()=>{
-                      this.setState({featureOne:{name:'AE',value: 18}});   
-                    }}>AE</ListGroup.Item>
-                  </ListGroup>
-                </Card.Body>
-              </Accordion.Collapse>
-            </Card>
-            <Card>
-              <Card.Header>
-                <Accordion.Toggle as={Button} variant="link" eventKey="1">
-                  Feature Two: {this.state.featureTwo.name}
-                </Accordion.Toggle>
-              </Card.Header>
-              <Accordion.Collapse eventKey="1">
-                <Card.Body>
-                  <ListGroup>
-                    <ListGroup.Item 
-                      disabled={this.state.featureOne.name ==='AA' } 
-                      action 
-                      onClick={()=>{
-                      this.setState({featureTwo:{name:'BA',value: 10}});   
-                      }}>BA {this.state.featureOne.name==='AA'?'(Option Not Available)':''}</ListGroup.Item>
-                    <ListGroup.Item action onClick={()=>{
-                      this.setState({featureTwo:{name:'BB',value: 12}});   
-                    }}>BB</ListGroup.Item> 
-                    <ListGroup.Item action onClick={()=>{
-                      this.setState({featureTwo:{name:'BC',value: 14}});   
-                    }}>BC</ListGroup.Item>
-                    <ListGroup.Item action onClick={()=>{
-                      this.setState({featureTwo:{name:'BD',value: 16}});   
-                    }}>BD</ListGroup.Item>
-                    <ListGroup.Item action onClick={()=>{
-                      this.setState({featureTwo:{name:'BE',value: 18}});   
-                    }}>BE</ListGroup.Item>
-                  </ListGroup>
-                </Card.Body>
-              </Accordion.Collapse>
-            </Card>
-            <Card>
-              <Card.Header>
-                <Accordion.Toggle as={Button} variant="link" eventKey="2">
-                  Feature Three: {this.state.featureThree.name}
-                </Accordion.Toggle>
-              </Card.Header>
-              <Accordion.Collapse eventKey="2">
-                <Card.Body>
-                  <ListGroup>
-                    <ListGroup.Item 
-                      disabled={this.state.featureOne.name==='AA' && this.state.featureTwo.name==='BB'} 
-                      action 
-                      onClick={()=>{
-                      this.setState({featureThree:{name:'CA',value: 10}});   
-                      }}>CA {this.state.featureOne.name==='AA' && this.state.featureTwo.name==='BB' ?'(Option Not Available)':''}</ListGroup.Item>
-                    <ListGroup.Item action onClick={()=>{
-                      this.setState({featureThree:{name:'CB',value: 12}});   
-                    }}>CB</ListGroup.Item> 
-                    <ListGroup.Item action onClick={()=>{
-                      this.setState({featureThree:{name:'CC',value: 14}});   
-                    }}>CC</ListGroup.Item>
-                    <ListGroup.Item action onClick={()=>{
-                      this.setState({featureThree:{name:'CD',value: 16}});   
-                    }}>CD</ListGroup.Item>
-                    <ListGroup.Item action onClick={()=>{
-                      this.setState({featureThree:{name:'CE',value: 18}});   
-                    }}>CE</ListGroup.Item>
-                  </ListGroup>
-                </Card.Body>
-              </Accordion.Collapse>
-            </Card>
-            <Card>
-              <Card.Header>
-                Total: {this.state.featureOne.value + this.state.featureTwo.value + this.state.featureThree.value}
+                Total: {this.calculateTotal()}
               </Card.Header>
             </Card>
           </Accordion>
