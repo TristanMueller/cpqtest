@@ -51,7 +51,7 @@ export default class cpqdemo extends Component {
     return(
       <Card>
         <Card.Header>
-          <Accordion.Toggle as={Button} variant="link" eventKey={index+1}>
+          <Accordion.Toggle as={Button} variant="link" style={{color:'black'}} eventKey={index+1}>
             Feature {index+1}: {this.state.selectedFeatures[index].name}
           </Accordion.Toggle>
         </Card.Header>
@@ -92,18 +92,7 @@ export default class cpqdemo extends Component {
       }
     }
     if(disabled){
-      return(
-        <ListGroup.Item 
-          action
-          disabled
-          style={{color:"red"}}
-          onClick={()=>{
-            let new_state = Object.assign({}, this.state.selectedFeatures); 
-            new_state[index] = {name:name,value:value};
-            this.setState({selectedFeatures: new_state});
-          }}
-        >{name}</ListGroup.Item>
-      );
+      return;
     }else{
       return(
         <ListGroup.Item 
