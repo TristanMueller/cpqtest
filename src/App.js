@@ -119,7 +119,11 @@ export default class cpqdemo extends Component {
 
   }
   calculateTotal(){
-    return this.state.selectedFeatures[0].value +this.state.selectedFeatures[1].value +this.state.selectedFeatures[2].value;
+    var total = 0
+    for(var i = 0; i<this.state.totalFeatures; i++){
+      total += this.state.selectedFeatures[i].value;
+    }
+    return total;
   }
   render () {
 
